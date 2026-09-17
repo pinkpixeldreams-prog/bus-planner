@@ -1,0 +1,6 @@
+{
+  "name": "SmartCommute SG",
+  "description": "Real-time bus arrival times, crowding telemetry, route navigator, and transit intelligence for Singapore commuters.",
+  "requestFramePermissions": ["geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
