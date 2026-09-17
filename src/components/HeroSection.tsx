@@ -1,5 +1,22 @@
 import React, { useState } from 'react';
-import { Search, Navigation, ArrowUpDown, MapPin, Compass, Building, Home, Plane, ShoppingBag, Sparkles, Loader2, CheckCircle2 } from 'lucide-react';
+import {
+  Search,
+  Navigation,
+  ArrowUpDown,
+  MapPin,
+  Compass,
+  Building,
+  Home,
+  Plane,
+  ShoppingBag,
+  Sparkles,
+  Loader2,
+  CheckCircle2,
+  Footprints,
+  Bus,
+  Train,
+  ArrowRight,
+} from 'lucide-react';
 import { PlannedTrip } from '../types';
 
 interface HeroSectionProps {
@@ -12,6 +29,7 @@ interface HeroSectionProps {
   onPlanJourney: (origin: string, destination: string) => void;
   plannedTrip: PlannedTrip | null;
   onClearTrip: () => void;
+  onSelectAlternative?: (index: number) => void;
 }
 
 export const HeroSection: React.FC<HeroSectionProps> = ({
@@ -24,6 +42,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   onPlanJourney,
   plannedTrip,
   onClearTrip,
+  onSelectAlternative,
 }) => {
   const [activeTab, setActiveTab] = useState<'stop' | 'planner'>('stop');
   const [origin, setOrigin] = useState('Bishan St 22, Blk 245');
@@ -34,6 +53,13 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
     const temp = origin;
     setOrigin(destination);
     setDestination(temp);
+    if (plannedTrip) {
+      setIsPlanning(true);
+      setTimeout(() => {
+        onPlanJourney(destination, temp);
+        setIsPlanning(false);
+      }, 400);
+    }
   };
 
   const handlePlanClick = () => {
@@ -46,6 +72,18 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
   const handlePresetSelect = (preset: string) => {
     setDestination(preset);
+    setIsPlanning(true);
+    setTimeout(() => {
+      onPlanJourney(origin, preset);
+      setIsPlanning(false);
+    }, 500);
+  };
+
+  const handleScrollToArrivals = () => {
+    const el = document.getElementById('arrivals-anchor');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   return (
@@ -232,35 +270,63 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 </div>
 
                 {/* Quick Presets */}
-                <div className="flex items-center gap-2 pt-1 flex-wrap text-xs text-[#64748B]">
-                  <span className="text-[#94A3B8] font-medium">Presets:</span>
+                <div className="flex items-center gap-1.5 pt-1 flex-wrap text-xs text-[#64748B]">
+                  <span className="text-[#94A3B8] font-medium mr-1">Presets:</span>
                   <button
                     type="button"
-                    onClick={() => handlePresetSelect('Marina Bay Financial Centre')}
+                    onClick={() => handlePresetSelect('Marina Bay Financial Centre, Tower 2')}
                     className="px-2.5 py-1 rounded-lg bg-[#0B1120] border border-white/5 hover:border-[#38bdf8]/30 hover:text-[#89ceff] transition-colors cursor-pointer flex items-center gap-1"
                   >
-                    <Building className="w-3 h-3" /> Work
+                    <Building className="w-3 h-3 text-[#38bdf8]" /> Work (MBFC)
                   </button>
                   <button
                     type="button"
                     onClick={() => handlePresetSelect('Bishan St 22 Blk 245')}
                     className="px-2.5 py-1 rounded-lg bg-[#0B1120] border border-white/5 hover:border-[#38bdf8]/30 hover:text-[#89ceff] transition-colors cursor-pointer flex items-center gap-1"
                   >
-                    <Home className="w-3 h-3" /> Home
+                    <Home className="w-3 h-3 text-[#10B981]" /> Home (Bishan)
                   </button>
                   <button
                     type="button"
-                    onClick={() => handlePresetSelect('Changi Airport Terminal 3')}
+                    onClick={() => handlePresetSelect('Changi Airport Terminal 2')}
                     className="px-2.5 py-1 rounded-lg bg-[#0B1120] border border-white/5 hover:border-[#38bdf8]/30 hover:text-[#89ceff] transition-colors cursor-pointer flex items-center gap-1"
                   >
-                    <Plane className="w-3 h-3" /> Changi Airport
+                    <Plane className="w-3 h-3 text-[#F59E0B]" /> Airport
                   </button>
                   <button
                     type="button"
                     onClick={() => handlePresetSelect('ION Orchard, Orchard Rd')}
                     className="px-2.5 py-1 rounded-lg bg-[#0B1120] border border-white/5 hover:border-[#38bdf8]/30 hover:text-[#89ceff] transition-colors cursor-pointer flex items-center gap-1"
                   >
-                    <ShoppingBag className="w-3 h-3" /> Orchard Rd
+                    <ShoppingBag className="w-3 h-3 text-[#EC4899]" /> Orchard
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handlePresetSelect('Bugis Junction, Victoria St')}
+                    className="px-2.5 py-1 rounded-lg bg-[#0B1120] border border-white/5 hover:border-[#38bdf8]/30 hover:text-[#89ceff] transition-colors cursor-pointer flex items-center gap-1"
+                  >
+                    <MapPin className="w-3 h-3 text-[#0ea5e9]" /> Bugis
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handlePresetSelect('Bedok Bus Interchange')}
+                    className="px-2.5 py-1 rounded-lg bg-[#0B1120] border border-white/5 hover:border-[#38bdf8]/30 hover:text-[#89ceff] transition-colors cursor-pointer flex items-center gap-1"
+                  >
+                    <MapPin className="w-3 h-3 text-[#6366F1]" /> Bedok
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handlePresetSelect('Clementi Mall')}
+                    className="px-2.5 py-1 rounded-lg bg-[#0B1120] border border-white/5 hover:border-[#38bdf8]/30 hover:text-[#89ceff] transition-colors cursor-pointer flex items-center gap-1"
+                  >
+                    <MapPin className="w-3 h-3 text-[#14B8A6]" /> Clementi
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handlePresetSelect('Jurong East Interchange')}
+                    className="px-2.5 py-1 rounded-lg bg-[#0B1120] border border-white/5 hover:border-[#38bdf8]/30 hover:text-[#89ceff] transition-colors cursor-pointer flex items-center gap-1"
+                  >
+                    <MapPin className="w-3 h-3 text-[#8B5CF6]" /> Jurong East
                   </button>
                 </div>
 
@@ -287,41 +353,129 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
               {/* Active Trip Results if planned */}
               {plannedTrip && (
-                <div className="mt-4 p-4 rounded-xl bg-[#0B1120] border border-[#0ea5e9]/40">
-                  <div className="flex items-center justify-between pb-2 border-b border-white/10 mb-3">
-                    <div className="flex items-center gap-2">
-                      <span className="px-2 py-0.5 rounded bg-[#0ea5e9]/20 text-[#89ceff] text-xs font-bold">
-                        FASTEST ROUTE
-                      </span>
-                      <span className="text-sm font-semibold text-[#F8FAFC]">
-                        {plannedTrip.totalTimeMin} mins total
-                      </span>
+                <div className="mt-4 p-4 rounded-xl bg-[#0B1120] border border-[#0ea5e9]/40 shadow-xl space-y-3">
+                  {/* Trip Header Summary */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-white/10">
+                    <div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="px-2 py-0.5 rounded bg-[#0ea5e9]/20 text-[#89ceff] text-[11px] font-bold uppercase tracking-wider">
+                          {plannedTrip.routeName || 'RECOMMENDED COMMUTE'}
+                        </span>
+                        <span className="text-base font-bold text-[#F8FAFC]">
+                          {plannedTrip.totalTimeMin} mins total
+                        </span>
+                      </div>
+                      <div className="text-xs text-[#94A3B8] mt-0.5 flex items-center gap-2">
+                        <span>Fare: <strong className="text-[#F8FAFC]">{plannedTrip.fareEst}</strong></span>
+                        <span>•</span>
+                        <span className="text-[#10B981] font-medium">Saves ~{plannedTrip.co2SavedKg}kg CO₂</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-3 text-xs text-[#94A3B8]">
-                      <span>Fare: {plannedTrip.fareEst}</span>
+                    <div className="flex items-center gap-2">
                       <button
                         onClick={onClearTrip}
-                        className="text-xs text-[#EF4444] hover:underline cursor-pointer"
+                        className="text-xs text-[#94A3B8] hover:text-[#EF4444] hover:underline cursor-pointer px-2 py-1 rounded bg-[#191f2f]"
                       >
-                        Reset
+                        Clear Route
                       </button>
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    {plannedTrip.segments.map((seg, idx) => (
-                      <div key={idx} className="flex items-start gap-3 text-xs">
-                        <span className={`px-2 py-1 rounded font-bold uppercase text-[10px] ${
-                          seg.mode === 'walk' ? 'bg-[#242a3a] text-[#94A3B8]' :
-                          seg.mode === 'bus' ? 'bg-[#0053db] text-white' : 'bg-[#00964D] text-white'
-                        }`}>
-                          {seg.mode}
-                        </span>
-                        <div className="flex-1">
-                          <div className="text-[#F8FAFC] font-semibold">{seg.label}</div>
-                          <div className="text-[#64748B]">{seg.details}</div>
+                  {/* Route Alternatives Switcher */}
+                  {plannedTrip.alternatives && plannedTrip.alternatives.length > 1 && (
+                    <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                      <span className="text-[11px] font-medium text-[#64748B] flex-shrink-0">
+                        Route Options:
+                      </span>
+                      {plannedTrip.alternatives.map((alt, idx) => {
+                        const isSelected = (plannedTrip.selectedAlternativeIndex ?? 0) === idx;
+                        return (
+                          <button
+                            key={alt.id}
+                            type="button"
+                            onClick={() => onSelectAlternative && onSelectAlternative(idx)}
+                            className={`px-2.5 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                              isSelected
+                                ? 'bg-[#0ea5e9] text-[#003751] shadow-md font-bold'
+                                : 'bg-[#191f2f] text-[#94A3B8] hover:text-white border border-white/5'
+                            }`}
+                          >
+                            {alt.title} ({alt.totalTimeMin}m)
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* Synchronized Boarding Stop Banner with Direct Scroll */}
+                  {plannedTrip.departureStopCode && (
+                    <div className="p-2.5 rounded-lg bg-[#0F1C3F] border border-[#38bdf8]/30 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <Bus className="w-4 h-4 text-[#89ceff] flex-shrink-0" />
+                        <div className="text-xs truncate">
+                          <span className="text-[#94A3B8]">Departure Boarding Stop: </span>
+                          <strong className="text-[#89ceff]">
+                            {plannedTrip.departureStopName || `#${plannedTrip.departureStopCode}`}
+                          </strong>
+                          <span className="text-[10px] text-[#64748B] ml-1.5 font-mono">
+                            (#{plannedTrip.departureStopCode})
+                          </span>
                         </div>
-                        <span className="text-[#94A3B8] font-mono">{seg.durationMin}m</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleScrollToArrivals}
+                        className="self-start sm:self-auto flex-shrink-0 px-2.5 py-1 rounded text-xs font-semibold bg-[#0ea5e9]/20 hover:bg-[#0ea5e9]/30 text-[#89ceff] border border-[#0ea5e9]/40 transition-colors flex items-center gap-1 cursor-pointer"
+                      >
+                        <span>View Live Bus Board</span>
+                        <ArrowRight className="w-3 h-3" />
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Step-by-Step Segments */}
+                  <div className="space-y-2 pt-1">
+                    {plannedTrip.segments.map((seg, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-start gap-2.5 text-xs p-2 rounded-lg bg-[#080D1A]/60 border border-white/5"
+                      >
+                        <div className="flex-shrink-0 mt-0.5">
+                          {seg.mode === 'walk' && (
+                            <span className="inline-flex items-center justify-center w-6 h-6 rounded bg-[#242a3a] text-[#94A3B8]">
+                              <Footprints className="w-3.5 h-3.5" />
+                            </span>
+                          )}
+                          {seg.mode === 'bus' && (
+                            <span className="inline-flex items-center justify-center w-6 h-6 rounded bg-[#0053db] text-white">
+                              <Bus className="w-3.5 h-3.5" />
+                            </span>
+                          )}
+                          {seg.mode === 'mrt' && (
+                            <span
+                              className="inline-flex items-center justify-center w-6 h-6 rounded text-white font-bold"
+                              style={{ backgroundColor: seg.color || '#00964D' }}
+                            >
+                              <Train className="w-3.5 h-3.5" />
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-[#F8FAFC] font-semibold flex items-center gap-2 flex-wrap">
+                            <span>{seg.label}</span>
+                            {seg.serviceNo && (
+                              <span className="px-1.5 py-0.2 rounded text-[10px] font-mono font-bold bg-[#0ea5e9]/20 text-[#89ceff] border border-[#0ea5e9]/30">
+                                Bus {seg.serviceNo}
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-[#94A3B8] text-[11px] mt-0.5 leading-relaxed">
+                            {seg.details}
+                          </div>
+                        </div>
+                        <span className="text-[#94A3B8] font-mono text-[11px] font-semibold flex-shrink-0">
+                          {seg.durationMin}m
+                        </span>
                       </div>
                     ))}
                   </div>

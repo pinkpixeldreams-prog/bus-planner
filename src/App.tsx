@@ -27,6 +27,7 @@ import { InstallModal } from './components/InstallModal';
 // Data
 import { BUS_STOPS_DATA, POPULAR_BUS_SERVICES, EDITORIAL_GUIDES } from './data/transitData';
 import { BusStop, BusServiceDetail, EditorialGuide, PlannedTrip } from './types';
+import { calculateJourney } from './utils/journeyPlanner';
 
 export default function App() {
   const [currentTab, setCurrentTab] = useState<'home' | 'bus-routes' | 'updates' | 'mrt-map' | 'blog'>('home');
@@ -150,38 +151,31 @@ export default function App() {
   };
 
   const handlePlanJourney = (origin: string, destination: string) => {
+    const planned = calculateJourney(origin, destination, BUS_STOPS_DATA);
+    setPlannedTrip(planned);
+    if (planned.departureStopCode) {
+      setSelectedStopCode(planned.departureStopCode);
+      setLocateSuccessMessage(`Boarding stop: ${planned.departureStopName || planned.departureStopCode}`);
+      setTimeout(() => setLocateSuccessMessage(null), 4500);
+    }
+  };
+
+  const handleSelectTripAlternative = (index: number) => {
+    if (!plannedTrip || !plannedTrip.alternatives || !plannedTrip.alternatives[index]) return;
+    const alt = plannedTrip.alternatives[index];
     setPlannedTrip({
-      origin,
-      destination,
-      totalTimeMin: 32,
-      fareEst: '$1.48',
-      segments: [
-        {
-          mode: 'walk',
-          label: 'Walk to Bishan MRT',
-          durationMin: 4,
-          details: 'Walk 280m through Blk 245 sheltered linkway',
-        },
-        {
-          mode: 'mrt',
-          label: 'North-South Line towards Marina South Pier',
-          durationMin: 18,
-          details: 'Board at Platform B • 8 stops to Marina Bay Interchange',
-        },
-        {
-          mode: 'bus',
-          label: 'Transfer to Bus 97 at Marina Bay Stn',
-          durationMin: 6,
-          details: 'Direct feeder to MBFC Tower 2 • Arrives in 2m (Seats Available)',
-        },
-        {
-          mode: 'walk',
-          label: 'Arrive at destination',
-          durationMin: 4,
-          details: 'Walk 120m into MBFC lobby',
-        },
-      ],
+      ...plannedTrip,
+      selectedAlternativeIndex: index,
+      totalTimeMin: alt.totalTimeMin,
+      fareEst: alt.fareEst,
+      departureStopCode: alt.departureStopCode,
+      departureStopName: alt.departureStopName,
+      routeName: alt.title,
+      segments: alt.segments,
     });
+    if (alt.departureStopCode) {
+      setSelectedStopCode(alt.departureStopCode);
+    }
   };
 
   const handleToggleBookmark = (stopCode: string) => {
@@ -224,6 +218,7 @@ export default function App() {
               onPlanJourney={handlePlanJourney}
               plannedTrip={plannedTrip}
               onClearTrip={() => setPlannedTrip(null)}
+              onSelectAlternative={handleSelectTripAlternative}
             />
 
             {/* Interactive Vector Transit Map */}

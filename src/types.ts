@@ -75,17 +75,36 @@ export interface ServiceAlert {
   alternative?: string;
 }
 
+export interface TripSegment {
+  mode: 'walk' | 'bus' | 'mrt';
+  label: string;
+  details: string;
+  durationMin: number;
+  color?: string;
+  serviceNo?: string;
+}
+
+export interface TripAlternative {
+  id: string;
+  title: string;
+  badge: string;
+  totalTimeMin: number;
+  fareEst: string;
+  departureStopCode: string;
+  departureStopName: string;
+  segments: TripSegment[];
+}
+
 export interface PlannedTrip {
   origin: string;
   destination: string;
   totalTimeMin: number;
   fareEst: string;
   co2SavedKg: number;
-  segments: {
-    mode: 'walk' | 'bus' | 'mrt';
-    label: string;
-    details: string;
-    durationMin: number;
-    color?: string;
-  }[];
+  departureStopCode?: string;
+  departureStopName?: string;
+  routeName?: string;
+  alternatives?: TripAlternative[];
+  selectedAlternativeIndex?: number;
+  segments: TripSegment[];
 }
