@@ -37,16 +37,35 @@ export const Header: React.FC<HeaderProps> = ({
             </span>
           </button>
 
-          {/* Navigation Links - Home Tab Only */}
-          <nav className="hidden lg:flex items-center gap-1 p-1 bg-[#0B1120]/60 rounded-xl border border-white/5">
+          {/* Navigation Links - Home & Talk to Us Tabs */}
+          <nav className="flex items-center gap-1 p-1 bg-[#0B1120]/60 rounded-xl border border-white/5">
             <button
               onClick={() => {
-                if (onSelectTab) onSelectTab('home');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+                onSelectTab('home');
+                if (currentTab === 'home') {
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
               }}
-              className="px-3.5 py-1.5 text-sm font-semibold rounded-lg bg-[#0ea5e9] text-[#003751] shadow-[0_0_12px_rgba(14,165,233,0.3)] cursor-pointer"
+              className={`px-3 sm:px-3.5 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition-all cursor-pointer ${
+                currentTab === 'home'
+                  ? 'bg-[#0ea5e9] text-[#003751] shadow-[0_0_12px_rgba(14,165,233,0.3)]'
+                  : 'text-[#bec8d2] hover:text-[#dde2f8] hover:bg-[#242a3a]'
+              }`}
             >
               Home
+            </button>
+            <button
+              onClick={() => {
+                onSelectTab('talk-to-us');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className={`px-3 sm:px-3.5 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition-all cursor-pointer ${
+                currentTab === 'talk-to-us'
+                  ? 'bg-[#0ea5e9] text-[#003751] shadow-[0_0_12px_rgba(14,165,233,0.3)]'
+                  : 'text-[#bec8d2] hover:text-[#dde2f8] hover:bg-[#242a3a]'
+              }`}
+            >
+              Talk to Us
             </button>
           </nav>
         </div>

@@ -124,9 +124,20 @@ export const Footer: React.FC<FooterProps> = ({ onNavClick }) => {
                 </span>
               </li>
               <li>
-                <span className="hover:text-[#89ceff] transition-colors cursor-pointer">
+                <button
+                  onClick={() => onNavClick('talk-to-us')}
+                  className="text-left text-[#38bdf8] hover:text-[#89ceff] transition-colors cursor-pointer font-medium"
+                >
+                  Talk to Us (Disqus Community)
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onNavClick('talk-to-us')}
+                  className="text-left hover:text-[#89ceff] transition-colors cursor-pointer"
+                >
                   Feedback &amp; Bug Reports
-                </span>
+                </button>
               </li>
             </ul>
           </div>

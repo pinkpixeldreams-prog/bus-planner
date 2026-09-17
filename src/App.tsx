@@ -9,6 +9,7 @@ import { PopularBuses } from './components/PopularBuses';
 import { GuidesSection } from './components/GuidesSection';
 import { FaqSection } from './components/FaqSection';
 import { Footer } from './components/Footer';
+import { TalkToUsView } from './components/TalkToUsView';
 
 // Modals
 import { BusRouteModal } from './components/BusRouteModal';
@@ -24,6 +25,7 @@ import { BusStop, BusServiceDetail, EditorialGuide, PlannedTrip } from './types'
 import { calculateJourney, resolveLocationHub } from './utils/journeyPlanner';
 
 export default function App() {
+  const [currentTab, setCurrentTab] = useState<'home' | 'talk-to-us'>('home');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStopCode, setSelectedStopCode] = useState<string>('01113');
   const [isLocating, setIsLocating] = useState(false);
@@ -73,6 +75,7 @@ export default function App() {
 
   const handleSelectStop = (code: string) => {
     setSelectedStopCode(code);
+    setCurrentTab('home');
   };
 
   const handlePerformSearch = (explicitQuery?: string) => {
@@ -245,84 +248,102 @@ export default function App() {
     <div className="min-h-screen flex flex-col bg-[#080D1A] text-[#F8FAFC] antialiased selection:bg-[#0ea5e9]/30 selection:text-[#89ceff]">
       {/* Top Header */}
       <Header
-        onSelectTab={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        currentTab={currentTab}
+        onSelectTab={(tab: string) => {
+          setCurrentTab(tab as any);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
         onOpenSearch={() => setIsSearchPaletteOpen(true)}
         onOpenAlerts={() => setIsAlertsModalOpen(true)}
         onOpenBookmarks={() => setIsBookmarksOpen(true)}
         savedStopsCount={savedStopCodes.length}
       />
 
-      {/* Main Content Area - Single Landing Page */}
+      {/* Main Content Area */}
       <main className="flex-1 pt-16">
-        {/* Hero Section */}
-        <HeroSection
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          onPerformSearch={handlePerformSearch}
-          onLocateNearest={handleLocateNearest}
-          isLocating={isLocating}
-          locateSuccessMessage={locateSuccessMessage}
-          onPlanJourney={handlePlanJourney}
-          plannedTrip={plannedTrip}
-          onClearTrip={() => setPlannedTrip(null)}
-          onSelectAlternative={handleSelectTripAlternative}
-        />
+        {currentTab === 'home' && (
+          <>
+            {/* Hero Section */}
+            <HeroSection
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              onPerformSearch={handlePerformSearch}
+              onLocateNearest={handleLocateNearest}
+              isLocating={isLocating}
+              locateSuccessMessage={locateSuccessMessage}
+              onPlanJourney={handlePlanJourney}
+              plannedTrip={plannedTrip}
+              onClearTrip={() => setPlannedTrip(null)}
+              onSelectAlternative={handleSelectTripAlternative}
+            />
 
-        {/* Interactive Vector Transit Map */}
-        <TransitMap
-          stops={BUS_STOPS_DATA}
-          selectedStopCode={selectedStopCode}
-          onSelectStop={handleSelectStop}
-        />
+            {/* Interactive Vector Transit Map */}
+            <TransitMap
+              stops={BUS_STOPS_DATA}
+              selectedStopCode={selectedStopCode}
+              onSelectStop={handleSelectStop}
+            />
 
-        {/* Live Arrivals Section */}
-        <div id="arrivals-anchor">
-          <ArrivalsSection
-            currentStop={currentStop}
-            isBookmarked={savedStopCodes.includes(selectedStopCode)}
-            onToggleBookmark={handleToggleBookmark}
-            onSelectBusService={handleSelectBusService}
-          />
-        </div>
+            {/* Live Arrivals Section */}
+            <div id="arrivals-anchor">
+              <ArrivalsSection
+                currentStop={currentStop}
+                isBookmarked={savedStopCodes.includes(selectedStopCode)}
+                onToggleBookmark={handleToggleBookmark}
+                onSelectBusService={handleSelectBusService}
+              />
+            </div>
 
-        {/* Feature Bento Grid */}
-        <FeatureBento
-          onTriggerNearest={handleLocateNearest}
-          onOpenBusRoutes={() => setIsSearchPaletteOpen(true)}
-          onOpenBookmarks={() => setIsBookmarksOpen(true)}
-          onOpenAlerts={() => setIsAlertsModalOpen(true)}
-        />
+            {/* Feature Bento Grid */}
+            <FeatureBento
+              onTriggerNearest={handleLocateNearest}
+              onOpenBusRoutes={() => setIsSearchPaletteOpen(true)}
+              onOpenBookmarks={() => setIsBookmarksOpen(true)}
+              onOpenAlerts={() => setIsAlertsModalOpen(true)}
+            />
 
-        {/* PWA Home Screen Install Banner */}
-        <InstallCallout onOpenInstallGuide={() => setIsInstallGuideOpen(true)} />
+            {/* PWA Home Screen Install Banner */}
+            <InstallCallout onOpenInstallGuide={() => setIsInstallGuideOpen(true)} />
 
-        {/* Popular Bus Badges */}
-        <div id="popular-buses-anchor">
-          <PopularBuses onSelectBus={handleSelectBusService} />
-        </div>
+            {/* Popular Bus Badges */}
+            <div id="popular-buses-anchor">
+              <PopularBuses onSelectBus={handleSelectBusService} />
+            </div>
 
-        {/* Editorial Commuter Guides with verified images */}
-        <div id="guides-anchor">
-          <GuidesSection
-            onOpenGuide={(guide) => setSelectedGuide(guide)}
-            onBrowseAll={() => setSelectedGuide(EDITORIAL_GUIDES[0])}
-          />
-        </div>
+            {/* Editorial Commuter Guides with verified images */}
+            <div id="guides-anchor">
+              <GuidesSection
+                onOpenGuide={(guide) => setSelectedGuide(guide)}
+                onBrowseAll={() => setSelectedGuide(EDITORIAL_GUIDES[0])}
+              />
+            </div>
 
-        {/* Frequently Asked Questions */}
-        <div id="faq-anchor">
-          <FaqSection
-            onOpenBlogPredictions={() => setSelectedGuide(EDITORIAL_GUIDES[1])}
-            onOpenBlogConcession={() => setSelectedGuide(EDITORIAL_GUIDES[0])}
-            onOpenBusRoutes={() => setIsSearchPaletteOpen(true)}
-          />
-        </div>
+            {/* Frequently Asked Questions */}
+            <div id="faq-anchor">
+              <FaqSection
+                onOpenBlogPredictions={() => setSelectedGuide(EDITORIAL_GUIDES[1])}
+                onOpenBlogConcession={() => setSelectedGuide(EDITORIAL_GUIDES[0])}
+                onOpenBusRoutes={() => setIsSearchPaletteOpen(true)}
+              />
+            </div>
+          </>
+        )}
+
+        {currentTab === 'talk-to-us' && (
+          <TalkToUsView onBackToHome={() => setCurrentTab('home')} />
+        )}
       </main>
 
       {/* Footer */}
       <Footer
         onNavClick={(action: string) => {
-          if (action === 'bus-routes' || action === 'search') {
+          if (action === 'talk-to-us') {
+            setCurrentTab('talk-to-us');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          } else if (action === 'home') {
+            setCurrentTab('home');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          } else if (action === 'bus-routes' || action === 'search') {
             setIsSearchPaletteOpen(true);
           } else if (action === 'updates' || action === 'alerts') {
             setIsAlertsModalOpen(true);
