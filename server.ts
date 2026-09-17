@@ -2,6 +2,8 @@ import express from 'express';
 import path from 'path';
 import dotenv from 'dotenv';
 import { createServer as createViteServer } from 'vite';
+import busHandler from './api/bus.js';
+import healthHandler from './api/health.js';
 import busArrivalHandler from './api/bus-arrival';
 
 // Load environment variables from .env
@@ -14,7 +16,16 @@ async function startServer() {
   // Middleware for parsing JSON
   app.use(express.json());
 
-  // LTA DataMall v3 Bus Arrival Serverless Route
+  // API Routes
+  app.all('/api/bus', (req, res) => {
+    return busHandler(req, res);
+  });
+
+  app.all('/api/health', (req, res) => {
+    return healthHandler(req, res);
+  });
+
+  // LTA DataMall v3 Bus Arrival Serverless Route (alias)
   app.all('/api/bus-arrival', (req, res) => {
     return busArrivalHandler(req, res);
   });
@@ -25,20 +36,9 @@ async function startServer() {
 
   app.all('/api', (req, res, next) => {
     if (req.query.BusStopCode || req.query.busStopCode) {
-      return busArrivalHandler(req, res);
+      return busHandler(req, res);
     }
     next();
-  });
-
-  // Health and connectivity check endpoint
-  app.get('/api/health', (req, res) => {
-    const hasKey = Boolean(process.env.LTA_ACCOUNT_KEY || process.env.LTA_DATAMALL_KEY || process.env.ACCOUNT_KEY);
-    res.json({
-      status: 'ok',
-      service: 'SmartCommute SG Serverless Gateway',
-      ltaAccountKeyConfigured: hasKey,
-      endpoint: '/api/bus-arrival?BusStopCode=83139',
-    });
   });
 
   // Vite middleware for development vs static build in production

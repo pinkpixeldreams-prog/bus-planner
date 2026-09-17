@@ -134,7 +134,9 @@ export const Footer: React.FC<FooterProps> = ({ onNavClick }) => {
 
         {/* Bottom Bar */}
         <div className="pt-6 flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-[#64748B]">
-          <p>© 2025 SmartCommute SG (smartcommutesg.com). Real-time transit data provided by Land Transport Authority (LTA) DataMall.</p>
+          <p>
+            Contains information from LTA DataMall, accessed {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}, made available under the terms of the Singapore Open Data Licence version 1.0.
+          </p>
           <p className="text-[11px] text-[#64748B]/80">
             SmartCommute SG is an independent commuter utility and is not affiliated with or endorsed by LTA, SMRT, or SBS Transit.
           </p>
