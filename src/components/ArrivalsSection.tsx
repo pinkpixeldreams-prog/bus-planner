@@ -21,7 +21,6 @@ export const ArrivalsSection: React.FC<ArrivalsSectionProps> = ({
   const [liveServices, setLiveServices] = useState<any[]>([]);
   const [retryCountdown, setRetryCountdown] = useState<number>(10);
   const [lastUpdatedTime, setLastUpdatedTime] = useState<string>('');
-  const [simulatedState, setSimulatedState] = useState<string>('real');
 
   const countdownTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -36,10 +35,6 @@ export const ArrivalsSection: React.FC<ArrivalsSectionProps> = ({
   };
 
   const fetchArrivals = useCallback(async () => {
-    if (simulatedState !== 'real') {
-      return;
-    }
-
     setPanelState('loading');
     try {
       const res = await fetch(`/api/bus?BusStopCode=${encodeURIComponent(currentStop.code)}`);
@@ -68,19 +63,12 @@ export const ArrivalsSection: React.FC<ArrivalsSectionProps> = ({
     } catch {
       setPanelState('unreachable');
     }
-  }, [currentStop.code, simulatedState]);
+  }, [currentStop.code]);
 
-  // Fetch when stop changes or simulatedState changes to 'real'
+  // Fetch when stop changes
   useEffect(() => {
-    if (simulatedState === 'real') {
-      fetchArrivals();
-    } else {
-      setPanelState(simulatedState as PanelState);
-      if (simulatedState === 'busy') {
-        setRetryCountdown(10);
-      }
-    }
-  }, [fetchArrivals, simulatedState, currentStop.code]);
+    fetchArrivals();
+  }, [fetchArrivals, currentStop.code]);
 
   // Handle countdown when in 'busy' state
   useEffect(() => {
@@ -90,9 +78,7 @@ export const ArrivalsSection: React.FC<ArrivalsSectionProps> = ({
         setRetryCountdown((prev) => {
           if (prev <= 1) {
             if (countdownTimerRef.current) clearInterval(countdownTimerRef.current);
-            if (simulatedState === 'real') {
-              fetchArrivals();
-            }
+            fetchArrivals();
             return 10;
           }
           return prev - 1;
@@ -103,7 +89,7 @@ export const ArrivalsSection: React.FC<ArrivalsSectionProps> = ({
         if (countdownTimerRef.current) clearInterval(countdownTimerRef.current);
       };
     }
-  }, [panelState, fetchArrivals, simulatedState]);
+  }, [panelState, fetchArrivals]);
 
   const getCrowdingBadge = (crowding?: string) => {
     switch (crowding?.toLowerCase()) {
@@ -232,40 +218,6 @@ export const ArrivalsSection: React.FC<ArrivalsSectionProps> = ({
             </div>
           </div>
 
-          {/* Usability Testing State Switcher Bar */}
-          <div className="mt-4 pt-3 pb-3 px-3.5 rounded-xl bg-[#080e1d] border border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-[#89ceff]">
-                Usability Test State:
-              </span>
-              <span className="text-xs text-[#94A3B8]">
-                Simulate or test participant feedback:
-              </span>
-            </div>
-            <div className="flex items-center flex-wrap gap-1.5">
-              {[
-                { id: 'real', label: 'Live Server' },
-                { id: 'loading', label: 'Loading' },
-                { id: 'empty', label: 'Empty' },
-                { id: 'refused', label: 'Refused' },
-                { id: 'busy', label: 'Busy' },
-                { id: 'unreachable', label: 'Unreachable' },
-              ].map((s) => (
-                <button
-                  key={s.id}
-                  onClick={() => setSimulatedState(s.id)}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
-                    simulatedState === s.id
-                      ? 'bg-[#0ea5e9] text-[#003751] font-bold shadow-sm'
-                      : 'bg-[#191f2f] text-[#94A3B8] hover:text-[#F8FAFC] border border-white/5'
-                  }`}
-                >
-                  {s.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
           {/* Dedicated State Banners (Displaying verbatim sentences) */}
           {panelState === 'loading' && (
             <div className="mt-6 p-4 rounded-xl bg-[#0ea5e9]/10 border border-[#0ea5e9]/30 flex items-center gap-3">
@@ -279,7 +231,7 @@ export const ArrivalsSection: React.FC<ArrivalsSectionProps> = ({
             </div>
           )}
 
-          {panelState === 'empty' && (
+          {panelState === 'empty' && (!currentStop.services || currentStop.services.length === 0) && (
             <div className="mt-6 p-6 rounded-xl bg-[#191f2f] border border-white/10 text-center">
               <Clock className="w-8 h-8 text-[#94A3B8] mx-auto mb-2 opacity-80" />
               <p className="text-base font-semibold text-[#F8FAFC]">
@@ -355,8 +307,8 @@ export const ArrivalsSection: React.FC<ArrivalsSectionProps> = ({
             </div>
           )}
 
-          {/* Arrival Cards Grid (Shown for 'ok', 'my key not set', or fallback during 'unreachable' / 'refused') */}
-          {panelState !== 'empty' && (
+          {/* Arrival Cards Grid (Shown for 'ok', 'my key not set', or whenever stop has services) */}
+          {currentStop.services && currentStop.services.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-6">
               {currentStop.services.map((svc: BusServiceArrival) => {
                 // Find matching live service if returned from /api/bus
