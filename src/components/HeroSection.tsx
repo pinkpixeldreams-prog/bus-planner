@@ -45,27 +45,38 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   onSelectAlternative,
 }) => {
   const [activeTab, setActiveTab] = useState<'stop' | 'planner'>('stop');
-  const [origin, setOrigin] = useState('Bishan St 22, Blk 245');
-  const [destination, setDestination] = useState('Marina Bay Financial Centre, Tower 2');
+  const [origin, setOrigin] = useState('');
+  const [destination, setDestination] = useState('');
   const [isPlanning, setIsPlanning] = useState(false);
 
   const handleSwapLocations = () => {
     const temp = origin;
     setOrigin(destination);
     setDestination(temp);
-    if (plannedTrip) {
+    if (plannedTrip && (destination || temp)) {
       setIsPlanning(true);
       setTimeout(() => {
-        onPlanJourney(destination, temp);
+        onPlanJourney(destination.trim() || 'Current Location', temp.trim() || 'Current Location');
         setIsPlanning(false);
       }, 400);
     }
   };
 
   const handlePlanClick = () => {
+    const finalOrigin = origin.trim() || 'Current GPS (Victoria St)';
+    const finalDest = destination.trim();
+    if (!finalDest) {
+      setDestination('Marina Bay Financial Centre, Tower 2');
+      setIsPlanning(true);
+      setTimeout(() => {
+        onPlanJourney(finalOrigin, 'Marina Bay Financial Centre, Tower 2');
+        setIsPlanning(false);
+      }, 600);
+      return;
+    }
     setIsPlanning(true);
     setTimeout(() => {
-      onPlanJourney(origin, destination);
+      onPlanJourney(finalOrigin, finalDest);
       setIsPlanning(false);
     }, 600);
   };
@@ -74,7 +85,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
     setDestination(preset);
     setIsPlanning(true);
     setTimeout(() => {
-      onPlanJourney(origin, preset);
+      onPlanJourney(origin.trim() || 'Current GPS (Victoria St)', preset);
       setIsPlanning(false);
     }, 500);
   };
@@ -226,7 +237,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                   <input
                     aria-label="Current Address or Origin"
                     className="w-full py-3 bg-transparent text-sm sm:text-base text-[#F8FAFC] placeholder:text-[#64748B] focus:outline-none"
-                    placeholder="Enter origin (e.g. Bishan St 22, Blk 245 or Current GPS)"
+                    placeholder="Enter starting location or tap GPS..."
                     type="text"
                     value={origin}
                     onChange={(e) => setOrigin(e.target.value)}
@@ -262,7 +273,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                   <input
                     aria-label="Destination Address"
                     className="w-full py-3 bg-transparent text-sm sm:text-base text-[#F8FAFC] placeholder:text-[#64748B] focus:outline-none"
-                    placeholder="Destination (e.g. Marina Bay Financial Centre, Tower 2)"
+                    placeholder="Enter destination (e.g. Marina Bay, Orchard, Airport)..."
                     type="text"
                     value={destination}
                     onChange={(e) => setDestination(e.target.value)}
