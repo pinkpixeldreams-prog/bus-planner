@@ -10,12 +10,6 @@ import { GuidesSection } from './components/GuidesSection';
 import { FaqSection } from './components/FaqSection';
 import { Footer } from './components/Footer';
 
-// Views
-import { BusRoutesView } from './components/BusRoutesView';
-import { UpdatesView } from './components/UpdatesView';
-import { MrtMapView } from './components/MrtMapView';
-import { BlogView } from './components/BlogView';
-
 // Modals
 import { BusRouteModal } from './components/BusRouteModal';
 import { GuideReaderModal } from './components/GuideReaderModal';
@@ -30,7 +24,6 @@ import { BusStop, BusServiceDetail, EditorialGuide, PlannedTrip } from './types'
 import { calculateJourney, resolveLocationHub } from './utils/journeyPlanner';
 
 export default function App() {
-  const [currentTab, setCurrentTab] = useState<'home' | 'bus-routes' | 'updates' | 'mrt-map' | 'blog'>('home');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStopCode, setSelectedStopCode] = useState<string>('01113');
   const [isLocating, setIsLocating] = useState(false);
@@ -80,7 +73,6 @@ export default function App() {
 
   const handleSelectStop = (code: string) => {
     setSelectedStopCode(code);
-    setCurrentTab('home');
   };
 
   const handlePerformSearch = (explicitQuery?: string) => {
@@ -96,7 +88,6 @@ export default function App() {
       setSelectedStopCode(matchedByCode.code);
       setLocateSuccessMessage(`Found stop: ${matchedByCode.name} (#${matchedByCode.code})`);
       setTimeout(() => setLocateSuccessMessage(null), 4000);
-      setCurrentTab('home');
       return;
     }
 
@@ -118,7 +109,6 @@ export default function App() {
       setSelectedStopCode(matchedByName.code);
       setLocateSuccessMessage(`Found stop: ${matchedByName.name} (#${matchedByName.code})`);
       setTimeout(() => setLocateSuccessMessage(null), 4000);
-      setCurrentTab('home');
       return;
     }
 
@@ -128,7 +118,6 @@ export default function App() {
       setSelectedStopCode(resolved.stop.code);
       setLocateSuccessMessage(`Found stop: ${resolved.stop.name} (#${resolved.stop.code})`);
       setTimeout(() => setLocateSuccessMessage(null), 4000);
-      setCurrentTab('home');
       return;
     }
 
@@ -256,96 +245,97 @@ export default function App() {
     <div className="min-h-screen flex flex-col bg-[#080D1A] text-[#F8FAFC] antialiased selection:bg-[#0ea5e9]/30 selection:text-[#89ceff]">
       {/* Top Header */}
       <Header
-        currentTab={currentTab}
-        onSelectTab={(tab: string) => setCurrentTab(tab as any)}
+        onSelectTab={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         onOpenSearch={() => setIsSearchPaletteOpen(true)}
         onOpenAlerts={() => setIsAlertsModalOpen(true)}
         onOpenBookmarks={() => setIsBookmarksOpen(true)}
         savedStopsCount={savedStopCodes.length}
       />
 
-      {/* Main Content Area */}
+      {/* Main Content Area - Single Landing Page */}
       <main className="flex-1 pt-16">
-        {currentTab === 'home' && (
-          <>
-            {/* Hero Section */}
-            <HeroSection
-              searchQuery={searchQuery}
-              onSearchChange={setSearchQuery}
-              onPerformSearch={handlePerformSearch}
-              onLocateNearest={handleLocateNearest}
-              isLocating={isLocating}
-              locateSuccessMessage={locateSuccessMessage}
-              onPlanJourney={handlePlanJourney}
-              plannedTrip={plannedTrip}
-              onClearTrip={() => setPlannedTrip(null)}
-              onSelectAlternative={handleSelectTripAlternative}
-            />
+        {/* Hero Section */}
+        <HeroSection
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          onPerformSearch={handlePerformSearch}
+          onLocateNearest={handleLocateNearest}
+          isLocating={isLocating}
+          locateSuccessMessage={locateSuccessMessage}
+          onPlanJourney={handlePlanJourney}
+          plannedTrip={plannedTrip}
+          onClearTrip={() => setPlannedTrip(null)}
+          onSelectAlternative={handleSelectTripAlternative}
+        />
 
-            {/* Interactive Vector Transit Map */}
-            <TransitMap
-              stops={BUS_STOPS_DATA}
-              selectedStopCode={selectedStopCode}
-              onSelectStop={handleSelectStop}
-            />
+        {/* Interactive Vector Transit Map */}
+        <TransitMap
+          stops={BUS_STOPS_DATA}
+          selectedStopCode={selectedStopCode}
+          onSelectStop={handleSelectStop}
+        />
 
-            {/* Live Arrivals Section */}
-            <div id="arrivals-anchor">
-              <ArrivalsSection
-                currentStop={currentStop}
-                isBookmarked={savedStopCodes.includes(selectedStopCode)}
-                onToggleBookmark={handleToggleBookmark}
-                onSelectBusService={handleSelectBusService}
-              />
-            </div>
-
-            {/* Feature Bento Grid */}
-            <FeatureBento
-              onTriggerNearest={handleLocateNearest}
-              onOpenBusRoutes={() => setCurrentTab('bus-routes')}
-              onOpenBookmarks={() => setIsBookmarksOpen(true)}
-              onOpenAlerts={() => setIsAlertsModalOpen(true)}
-            />
-
-            {/* PWA Home Screen Install Banner */}
-            <InstallCallout onOpenInstallGuide={() => setIsInstallGuideOpen(true)} />
-
-            {/* Popular Bus Badges */}
-            <PopularBuses onSelectBus={handleSelectBusService} />
-
-            {/* Editorial Commuter Guides with verified images */}
-            <GuidesSection
-              onOpenGuide={(guide) => setSelectedGuide(guide)}
-              onBrowseAll={() => setCurrentTab('blog')}
-            />
-
-            {/* Frequently Asked Questions */}
-            <FaqSection
-              onOpenBlogPredictions={() => setSelectedGuide(EDITORIAL_GUIDES[1])}
-              onOpenBlogConcession={() => setSelectedGuide(EDITORIAL_GUIDES[0])}
-              onOpenBusRoutes={() => setCurrentTab('bus-routes')}
-            />
-          </>
-        )}
-
-        {currentTab === 'bus-routes' && (
-          <BusRoutesView
-            onSelectBus={handleSelectBusService}
-            onSelectStopCode={handleSelectStop}
+        {/* Live Arrivals Section */}
+        <div id="arrivals-anchor">
+          <ArrivalsSection
+            currentStop={currentStop}
+            isBookmarked={savedStopCodes.includes(selectedStopCode)}
+            onToggleBookmark={handleToggleBookmark}
+            onSelectBusService={handleSelectBusService}
           />
-        )}
+        </div>
 
-        {currentTab === 'updates' && <UpdatesView />}
+        {/* Feature Bento Grid */}
+        <FeatureBento
+          onTriggerNearest={handleLocateNearest}
+          onOpenBusRoutes={() => setIsSearchPaletteOpen(true)}
+          onOpenBookmarks={() => setIsBookmarksOpen(true)}
+          onOpenAlerts={() => setIsAlertsModalOpen(true)}
+        />
 
-        {currentTab === 'mrt-map' && <MrtMapView />}
+        {/* PWA Home Screen Install Banner */}
+        <InstallCallout onOpenInstallGuide={() => setIsInstallGuideOpen(true)} />
 
-        {currentTab === 'blog' && (
-          <BlogView onOpenGuide={(guide) => setSelectedGuide(guide)} />
-        )}
+        {/* Popular Bus Badges */}
+        <div id="popular-buses-anchor">
+          <PopularBuses onSelectBus={handleSelectBusService} />
+        </div>
+
+        {/* Editorial Commuter Guides with verified images */}
+        <div id="guides-anchor">
+          <GuidesSection
+            onOpenGuide={(guide) => setSelectedGuide(guide)}
+            onBrowseAll={() => setSelectedGuide(EDITORIAL_GUIDES[0])}
+          />
+        </div>
+
+        {/* Frequently Asked Questions */}
+        <div id="faq-anchor">
+          <FaqSection
+            onOpenBlogPredictions={() => setSelectedGuide(EDITORIAL_GUIDES[1])}
+            onOpenBlogConcession={() => setSelectedGuide(EDITORIAL_GUIDES[0])}
+            onOpenBusRoutes={() => setIsSearchPaletteOpen(true)}
+          />
+        </div>
       </main>
 
       {/* Footer */}
-      <Footer onNavClick={(tab: string) => setCurrentTab(tab as any)} />
+      <Footer
+        onNavClick={(action: string) => {
+          if (action === 'bus-routes' || action === 'search') {
+            setIsSearchPaletteOpen(true);
+          } else if (action === 'updates' || action === 'alerts') {
+            setIsAlertsModalOpen(true);
+          } else if (action === 'bookmarks') {
+            setIsBookmarksOpen(true);
+          } else if (action === 'blog' || action === 'guides') {
+            const el = document.getElementById('guides-anchor');
+            if (el) el.scrollIntoView({ behavior: 'smooth' });
+          } else {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+        }}
+      />
 
       {/* Modals & Overlays */}
       <BusRouteModal

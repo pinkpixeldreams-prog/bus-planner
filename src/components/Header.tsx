@@ -37,57 +37,16 @@ export const Header: React.FC<HeaderProps> = ({
             </span>
           </button>
 
-          {/* Navigation Links */}
+          {/* Navigation Links - Home Tab Only */}
           <nav className="hidden lg:flex items-center gap-1 p-1 bg-[#0B1120]/60 rounded-xl border border-white/5">
             <button
-              onClick={() => onSelectTab('home')}
-              className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition-all ${
-                currentTab === 'home'
-                  ? 'bg-[#0ea5e9] text-[#003751] shadow-[0_0_12px_rgba(14,165,233,0.3)]'
-                  : 'text-[#bec8d2] hover:text-[#dde2f8] hover:bg-[#242a3a]'
-              }`}
+              onClick={() => {
+                if (onSelectTab) onSelectTab('home');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className="px-3.5 py-1.5 text-sm font-semibold rounded-lg bg-[#0ea5e9] text-[#003751] shadow-[0_0_12px_rgba(14,165,233,0.3)] cursor-pointer"
             >
               Home
-            </button>
-            <button
-              onClick={() => onSelectTab('bus-routes')}
-              className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition-all ${
-                currentTab === 'bus-routes'
-                  ? 'bg-[#0ea5e9] text-[#003751] shadow-[0_0_12px_rgba(14,165,233,0.3)]'
-                  : 'text-[#bec8d2] hover:text-[#dde2f8] hover:bg-[#242a3a]'
-              }`}
-            >
-              Bus Routes
-            </button>
-            <button
-              onClick={() => onSelectTab('updates')}
-              className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition-all ${
-                currentTab === 'updates'
-                  ? 'bg-[#0ea5e9] text-[#003751] shadow-[0_0_12px_rgba(14,165,233,0.3)]'
-                  : 'text-[#bec8d2] hover:text-[#dde2f8] hover:bg-[#242a3a]'
-              }`}
-            >
-              Updates
-            </button>
-            <button
-              onClick={() => onSelectTab('mrt-map')}
-              className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition-all ${
-                currentTab === 'mrt-map'
-                  ? 'bg-[#0ea5e9] text-[#003751] shadow-[0_0_12px_rgba(14,165,233,0.3)]'
-                  : 'text-[#bec8d2] hover:text-[#dde2f8] hover:bg-[#242a3a]'
-              }`}
-            >
-              MRT Map
-            </button>
-            <button
-              onClick={() => onSelectTab('blog')}
-              className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition-all ${
-                currentTab === 'blog'
-                  ? 'bg-[#0ea5e9] text-[#003751] shadow-[0_0_12px_rgba(14,165,233,0.3)]'
-                  : 'text-[#bec8d2] hover:text-[#dde2f8] hover:bg-[#242a3a]'
-              }`}
-            >
-              Blog
             </button>
           </nav>
         </div>
