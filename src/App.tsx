@@ -27,7 +27,7 @@ import { InstallModal } from './components/InstallModal';
 // Data
 import { BUS_STOPS_DATA, POPULAR_BUS_SERVICES, EDITORIAL_GUIDES } from './data/transitData';
 import { BusStop, BusServiceDetail, EditorialGuide, PlannedTrip } from './types';
-import { calculateJourney } from './utils/journeyPlanner';
+import { calculateJourney, resolveLocationHub } from './utils/journeyPlanner';
 
 export default function App() {
   const [currentTab, setCurrentTab] = useState<'home' | 'bus-routes' | 'updates' | 'mrt-map' | 'blog'>('home');
@@ -90,27 +90,44 @@ export default function App() {
       return;
     }
 
-    // Check direct code match
+    // 1. Check direct stop code match
     const matchedByCode = BUS_STOPS_DATA.find((s) => s.code.toLowerCase() === query);
     if (matchedByCode) {
       setSelectedStopCode(matchedByCode.code);
+      setLocateSuccessMessage(`Found stop: ${matchedByCode.name} (#${matchedByCode.code})`);
+      setTimeout(() => setLocateSuccessMessage(null), 4000);
       setCurrentTab('home');
       return;
     }
 
-    // Check bus service match
+    // 2. Check bus service match
     const matchedBus = POPULAR_BUS_SERVICES.find((b) => b.serviceNo.toLowerCase() === query);
     if (matchedBus) {
       setSelectedBusService(matchedBus);
       return;
     }
 
-    // Check partial name
+    // 3. Check partial name, road, or description
     const matchedByName = BUS_STOPS_DATA.find(
-      (s) => s.name.toLowerCase().includes(query) || s.road.toLowerCase().includes(query)
+      (s) =>
+        s.name.toLowerCase().includes(query) ||
+        s.road.toLowerCase().includes(query) ||
+        (s.description && s.description.toLowerCase().includes(query))
     );
     if (matchedByName) {
       setSelectedStopCode(matchedByName.code);
+      setLocateSuccessMessage(`Found stop: ${matchedByName.name} (#${matchedByName.code})`);
+      setTimeout(() => setLocateSuccessMessage(null), 4000);
+      setCurrentTab('home');
+      return;
+    }
+
+    // 4. Transit hub & regional resolver (handles "pasir ris", "tampines", "woodlands", "airport", etc.)
+    const resolved = resolveLocationHub(query, BUS_STOPS_DATA);
+    if (resolved && resolved.stop) {
+      setSelectedStopCode(resolved.stop.code);
+      setLocateSuccessMessage(`Found stop: ${resolved.stop.name} (#${resolved.stop.code})`);
+      setTimeout(() => setLocateSuccessMessage(null), 4000);
       setCurrentTab('home');
       return;
     }
@@ -123,7 +140,51 @@ export default function App() {
     setIsLocating(true);
     setLocateSuccessMessage(null);
 
-    // Try real geolocation or fallback
+    const query = searchQuery.trim().toLowerCase();
+
+    // If the user has typed an address, town, or stop name in the search input
+    if (query) {
+      setTimeout(() => {
+        setIsLocating(false);
+
+        // 1. Direct code
+        const byCode = BUS_STOPS_DATA.find((s) => s.code.toLowerCase() === query);
+        if (byCode) {
+          setSelectedStopCode(byCode.code);
+          setLocateSuccessMessage(`Closest stop located: ${byCode.name} (#${byCode.code})`);
+          setTimeout(() => setLocateSuccessMessage(null), 4500);
+          return;
+        }
+
+        // 2. Direct name, road, or description
+        const byName = BUS_STOPS_DATA.find(
+          (s) =>
+            s.name.toLowerCase().includes(query) ||
+            s.road.toLowerCase().includes(query) ||
+            (s.description && s.description.toLowerCase().includes(query))
+        );
+        if (byName) {
+          setSelectedStopCode(byName.code);
+          setLocateSuccessMessage(`Closest stop located: ${byName.name} (#${byName.code})`);
+          setTimeout(() => setLocateSuccessMessage(null), 4500);
+          return;
+        }
+
+        // 3. Regional hub resolver (handles "pasir ris", "tampines", "woodlands", "orchard", etc.)
+        const resolved = resolveLocationHub(query, BUS_STOPS_DATA);
+        if (resolved && resolved.stop) {
+          setSelectedStopCode(resolved.stop.code);
+          setLocateSuccessMessage(`Closest stop located: ${resolved.stop.name} (#${resolved.stop.code})`);
+          setTimeout(() => setLocateSuccessMessage(null), 4500);
+          return;
+        }
+
+        setIsSearchPaletteOpen(true);
+      }, 350);
+      return;
+    }
+
+    // If search box is empty, use device geolocation
     if ('geolocation' in navigator) {
       navigator.geolocation.getCurrentPosition(
         () => {
@@ -146,7 +207,7 @@ export default function App() {
         setSelectedStopCode('01113');
         setLocateSuccessMessage('Nearest stop located: Bugis Stn Exit A (40m)');
         setTimeout(() => setLocateSuccessMessage(null), 4000);
-      }, 700);
+      }, 600);
     }
   };
 

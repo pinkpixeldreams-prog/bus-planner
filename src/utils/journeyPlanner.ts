@@ -137,6 +137,15 @@ const HUBS: HubLocation[] = [
     mrtStation: 'Woodlands MRT (NS9/TE2)',
     zone: 'north',
   },
+  {
+    id: 'pasirris',
+    name: 'Pasir Ris Bus Interchange',
+    aliases: ['pasir ris', 'whitesands', 'white sands', 'pasir ris central', 'pasir ris dr 3', 'downtown east', '77009'],
+    stopCode: '77009',
+    mrtLine: 'East-West Line',
+    mrtStation: 'Pasir Ris MRT (EW1)',
+    zone: 'east',
+  },
 ];
 
 // Direct Bus services matrix between locations
@@ -150,6 +159,11 @@ interface DirectBusOption {
 }
 
 const DIRECT_BUSES: DirectBusOption[] = [
+  // Pasir Ris direct connections
+  { serviceNo: '12', fromHub: 'pasirris', toHub: 'bugis', durationMin: 42, via: 'via Tampines, Bedok & Kallang', operator: 'Go-Ahead' },
+  { serviceNo: '12', fromHub: 'bugis', toHub: 'pasirris', durationMin: 42, via: 'via Sims Ave, Bedok & Tampines', operator: 'Go-Ahead' },
+  { serviceNo: '58', fromHub: 'pasirris', toHub: 'bishan', durationMin: 38, via: 'via Tampines, Kaki Bukit & Serangoon', operator: 'SBS Transit' },
+  { serviceNo: '58', fromHub: 'bishan', toHub: 'pasirris', durationMin: 38, via: 'via Serangoon & Tampines', operator: 'SBS Transit' },
   // Airport direct connections
   { serviceNo: '36', fromHub: 'airport', toHub: 'bugis', durationMin: 44, via: 'via Marine Parade Rd & Suntec', operator: 'Go-Ahead' },
   { serviceNo: '36', fromHub: 'bugis', toHub: 'airport', durationMin: 44, via: 'via Suntec & ECP Highway', operator: 'Go-Ahead' },
@@ -257,7 +271,11 @@ export function resolveLocationHub(input: string, allStops: BusStop[]): { hub: H
     const hub = HUBS.find((h) => h.id === 'jurongeast')!;
     return { hub, stop: allStops.find((s) => s.code === hub.stopCode) || allStops[0] };
   }
-  if (clean.includes('tampines') || clean.includes('pasir ris') || clean.includes('simei')) {
+  if (clean.includes('pasir ris') || clean.includes('whitesands') || clean.includes('white sands') || clean.includes('downtown east') || clean.includes('loyang')) {
+    const hub = HUBS.find((h) => h.id === 'pasirris')!;
+    return { hub, stop: allStops.find((s) => s.code === hub.stopCode) || allStops[0] };
+  }
+  if (clean.includes('tampines') || clean.includes('simei') || clean.includes('tampines hub') || clean.includes('century square')) {
     const hub = HUBS.find((h) => h.id === 'tampines')!;
     return { hub, stop: allStops.find((s) => s.code === hub.stopCode) || allStops[0] };
   }
